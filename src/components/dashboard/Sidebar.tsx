@@ -11,7 +11,9 @@ import {
   Settings,
   UsersRound,
 } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { logout } from "@/redux/features/auth/authSlice";
 
 export default function Sidebar({
   isOpen,
@@ -64,6 +66,22 @@ export default function Sidebar({
     },
   ];
 
+  // handling logout
+  const dispatch = useDispatch();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // 1. Remove token from browser storage
+    localStorage.removeItem("token");
+
+    // 2. Clear Redux Store
+    dispatch(logout());
+
+    // 3. Redirect to Login Page
+    router.replace("/login");
+    // .replace() prevents the user from clicking "Back" to access the dashboard again
+  };
+
   return (
     <nav
       className={`
@@ -89,26 +107,33 @@ export default function Sidebar({
           <MdCancel size={24} />
         </button>
       </div>
-
       <div className="px-4">
         <div className="">
           <ul className="mt-3 space-y-4">
             {menuItems.map((item, index) => {
               const isActive = pathname === item.href;
               return (
-                <Link
-                  key={index}
-                  href={item.href}
-                  className={`text-slate-800 text-[15px] font-medium space-x-3 flex items-center cursor-pointer bg-[#F7F9F8] hover:bg-[#B8C398] active:bg-[#B8C398] focus:bg-[#B8C398] px-3 py-3 transition-all duration-300 ${
-                    isActive ? "bg-[#B8C398]" : ""
-                  }`}
-                >
-                  {item.icon}
-                  <span>{item.title}</span>
-                </Link>
+                <li key={index}>
+                  <Link
+                    href={item.href}
+                    className={`text-slate-800 text-[15px] font-medium space-x-3 flex items-center cursor-pointer bg-[#F7F9F8] hover:bg-[#B8C398] active:bg-[#B8C398] focus:bg-[#B8C398] px-3 py-3 transition-all duration-300 ${
+                      isActive ? "bg-[#B8C398]" : ""
+                    }`}
+                  >
+                    {item.icon}
+                    <span>{item.title}</span>
+                  </Link>
+                </li>
               );
             })}
-            <li></li>
+            <li>
+              <button
+                onClick={handleLogout}
+                className={`text-slate-800 text-[15px] font-medium space-x-3 flex items-center cursor-pointer bg-[#F7F9F8] hover:bg-[#B8C398] active:bg-[#B8C398] focus:bg-[#B8C398] px-3 py-3 transition-all duration-300`}
+              >
+                Logout
+              </button>
+            </li>
           </ul>
         </div>
       </div>
