@@ -18,7 +18,6 @@ const AdminLogin = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       await dispatch(loginUser({ email, password })).unwrap();
       router.push("/");
@@ -122,7 +121,6 @@ const AdminLogin = () => {
               type="submit"
               className="w-full flex justify-center py-2 px-4 sm:py-3 border border-transparent rounded-lg shadow-sm text-[20px]  font-bold text-[#181818] bg-[#FFE0A7] hover:bg-[#ebd3a6] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e9cc96] cursor-pointer"
             >
-              Sign In
               {loading ? "Logging in..." : "Login"}
             </button>
             {error && <p className="text-red-500 text-center">{error}</p>}

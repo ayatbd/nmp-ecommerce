@@ -1,6 +1,7 @@
 import api from "@/lib/axios";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
+// Optional: If you prefer a library, run `npm install jwt-decode`
+// import { jwtDecode } from "jwt-decode"; 
 
 interface User {
     id: string;
@@ -21,7 +22,29 @@ const initialState: AuthState = {
     error: null,
 };
 
-// 🔹 LOGIN API CALL
+// Helper function to decode JWT token without external libraries
+const decodeToken = (token: string): User | null => {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+            atob(base64)
+                .split('')
+                .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                .join('')
+        );
+        const decoded = JSON.parse(jsonPayload);
+
+        return {
+            id: decoded.id,
+            email: decoded.email
+        };
+    } catch (error) {
+        return null;
+    }
+};
+
+// LOGIN API CALL
 export const loginUser = createAsyncThunk(
     "auth/login-admin",
     async (
@@ -30,7 +53,7 @@ export const loginUser = createAsyncThunk(
     ) => {
         try {
             const res = await api.post("/auth/login-admin", credentials);
-            return res.data; // { user, token }
+            return res.data;
         } catch (error: any) {
             return thunkAPI.rejectWithValue(
                 error.response?.data?.message || "Login failed"
@@ -56,12 +79,21 @@ const authSlice = createSlice({
                 state.loading = true;
                 state.error = null;
             })
-            // login success
+            // 🔹 LOGIN SUCCESS (FIXED HERE)
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.loading = false;
-                state.user = action.payload.user;
-                state.token = action.payload.token;
-                localStorage.setItem("token", action.payload.token);
+
+                // 1. Fix path: API returns { data: { accessToken: "..." } }
+                // So we access action.payload.data.accessToken
+                const accessToken = action.payload?.data?.accessToken;
+
+                if (accessToken) {
+                    state.token = accessToken;
+                    localStorage.setItem("token", accessToken);
+
+                    // 2. Decode user from token (because API didn't send a 'user' object)
+                    state.user = decodeToken(accessToken);
+                }
             })
             // login failed
             .addCase(loginUser.rejected, (state, action) => {
