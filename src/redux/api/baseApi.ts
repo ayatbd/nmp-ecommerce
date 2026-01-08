@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 // Define a service using a base URL and expected endpoints
 export const baseApi = createApi({
     reducerPath: 'api',
-    baseQuery: fetchBaseQuery({ baseUrl: 'https://jsonplaceholder.typicode.com/' }),
+    baseQuery: fetchBaseQuery({ baseUrl: 'https://nmp-backend.vercel.app/api/v1' }),
     endpoints: (build) => ({
         getTods: build.query({
             query: () => "/todos",

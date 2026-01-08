@@ -1,17 +1,6 @@
 "use client";
-import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
-import {
-  MdSearch,
-  MdMenu,
-  MdEmail,
-  MdNotifications,
-  MdPerson,
-  MdDashboard,
-  MdArticle,
-  MdSchedule,
-  MdLogout,
-} from "react-icons/md";
+import { MdMenu } from "react-icons/md";
 
 export default function Navbar({
   toggleSidebar,
