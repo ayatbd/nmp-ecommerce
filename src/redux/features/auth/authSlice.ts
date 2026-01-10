@@ -1,6 +1,6 @@
 import api from "@/lib/axios";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-// Optional: If you prefer a library, run `npm install jwt-decode`
+// Optional: If prefer a library, `npm install jwt-decode`
 // import { jwtDecode } from "jwt-decode"; 
 
 interface User {
@@ -54,10 +54,11 @@ export const loginUser = createAsyncThunk(
         try {
             const res = await api.post("/auth/login-admin", credentials);
             return res.data;
-        } catch (error: any) {
-            return thunkAPI.rejectWithValue(
-                error.response?.data?.message || "Login failed"
-            );
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Object && 'response' in error
+                ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+                : "Login failed";
+            return thunkAPI.rejectWithValue(errorMessage || "Login failed");
         }
     }
 );
@@ -69,7 +70,7 @@ const authSlice = createSlice({
         logout: (state) => {
             state.user = null;
             state.token = null;
-            localStorage.removeItem("token");
+            localStorage.removeItem("admin-token");
         },
     },
     extraReducers: (builder) => {
@@ -89,7 +90,7 @@ const authSlice = createSlice({
 
                 if (accessToken) {
                     state.token = accessToken;
-                    localStorage.setItem("token", accessToken);
+                    localStorage.setItem("admin-token", accessToken);
 
                     // 2. Decode user from token (because API didn't send a 'user' object)
                     state.user = decodeToken(accessToken);

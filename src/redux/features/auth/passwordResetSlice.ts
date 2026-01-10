@@ -1,5 +1,6 @@
+import api from "@/lib/axios";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 interface ResetState {
     email: string;
@@ -17,22 +18,23 @@ const initialState: ResetState = {
     error: null,
 };
 
-// 🔹 Send OTP
+// Send OTP
 export const sendOtp = createAsyncThunk(
     "passwordReset/sendOtp",
     async (email: string, thunkAPI) => {
         try {
-            const res = await axios.post("/api/auth/send-otp", { email });
+            const res = await api.post("/api/auth/send-otp", { email });
             return res.data;
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const error = err as AxiosError<{ message: string }>;
             return thunkAPI.rejectWithValue(
-                err.response?.data?.message || "Failed to send OTP"
+                error.response?.data?.message || "Failed to send OTP"
             );
         }
     }
 );
 
-// 🔹 Verify OTP
+//  Verify OTP
 export const verifyOtp = createAsyncThunk(
     "passwordReset/verifyOtp",
     async (
@@ -42,15 +44,16 @@ export const verifyOtp = createAsyncThunk(
         try {
             const res = await axios.post("/api/auth/verify-otp", data);
             return res.data;
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const error = err as AxiosError<{ message: string }>;
             return thunkAPI.rejectWithValue(
-                err.response?.data?.message || "Invalid OTP"
+                error.response?.data?.message || "Invalid OTP"
             );
         }
     }
 );
 
-// 🔹 Reset Password
+//  Reset Password
 export const resetPassword = createAsyncThunk(
     "passwordReset/resetPassword",
     async (
@@ -60,9 +63,10 @@ export const resetPassword = createAsyncThunk(
         try {
             const res = await axios.post("/api/auth/reset-password", data);
             return res.data;
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const error = err as AxiosError<{ message: string }>;
             return thunkAPI.rejectWithValue(
-                err.response?.data?.message || "Password reset failed"
+                error.response?.data?.message || "Password reset failed"
             );
         }
     }
